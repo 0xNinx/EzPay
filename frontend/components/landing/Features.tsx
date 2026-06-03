@@ -1,49 +1,40 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 const features = [
   {
-    icon: '⚡',
-    title: 'Instant Settlement',
-    description: 'Receive payments directly to your Stellar wallet with near-zero transaction times.',
+    title: 'QR Code Payments',
+    description: 'Generate QR codes for instant stablecoin payments from customers.',
   },
   {
-    icon: '🔐',
-    title: 'Secure & Transparent',
-    description: 'Leverage blockchain immutability and smart contract verification for every transaction.',
+    title: 'Fiat Settlement',
+    description: 'Receive payments directly in your bank account via Anchor infrastructure.',
   },
   {
-    icon: '🌍',
-    title: 'Global Reach',
-    description: 'Accept payments from anywhere in the world without traditional banking restrictions.',
+    title: 'Unregistered Merchants',
+    description: 'Pay any merchant by wallet address or bank details, no registration required.',
   },
   {
-    icon: '💰',
-    title: 'Minimal Fees',
-    description: 'Enjoy ultra-low transaction costs compared to traditional payment processors.',
+    title: 'Stellar Fast Settlement',
+    description: '2-5 second transaction finality with extremely low fees.',
   },
 ];
 
 export function Features() {
-  const [visibleCards, setVisibleCards] = useState<Set<number>>(new Set());
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    // Stagger animation for cards
-    features.forEach((_, index) => {
-      setTimeout(() => {
-        setVisibleCards((prev) => new Set([...prev, index]));
-      }, index * 150);
-    });
+    setIsVisible(true);
   }, []);
 
   return (
-    <section className="py-20 px-4 bg-background">
+    <section id="features" className="py-20 px-4 bg-background">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Why Choose EzPay?</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Built for merchants who demand speed, security, and simplicity.
+            Lightweight payment infrastructure for real-world usability and cross-border accessibility.
           </p>
         </div>
 
@@ -51,16 +42,12 @@ export function Features() {
           {features.map((feature, index) => (
             <div
               key={index}
-              className={`p-6 bg-card border border-border rounded-xl hover:border-accent hover:shadow-lg hover:shadow-accent/20 transition-all duration-500 transform cursor-pointer group ${
-                visibleCards.has(index)
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-8'
+              className={`p-6 bg-card border border-border rounded-lg hover:border-accent hover:shadow-lg hover:shadow-accent/10 hover:-translate-y-1 transition-all duration-300 ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
               }`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                {feature.icon}
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-2">{feature.title}</h3>
+              <h3 className="text-lg font-bold text-foreground mb-2">{feature.title}</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 {feature.description}
               </p>

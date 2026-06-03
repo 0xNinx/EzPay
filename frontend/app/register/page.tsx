@@ -149,7 +149,7 @@ export default function RegisterPage() {
             <button
               onClick={() => {
                 if (validateStep()) {
-                  console.log('[v0] Registration completed with data:', formData);
+                  console.log('Registration completed with data:', formData);
                 }
               }}
               className="flex-1 px-6 py-3 bg-accent text-accent-foreground font-semibold rounded-lg hover:shadow-lg hover:shadow-accent/50 transition-all duration-300 active:scale-95"

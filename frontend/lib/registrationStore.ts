@@ -72,7 +72,7 @@ export const useRegistrationStore = create<RegistrationState>((set) => ({
   },
   submit: () => {
     set((state) => {
-      console.log('[v0] Registration submitted with data:', state.formData);
+      console.log('Registration submitted with data:', state.formData);
       return state;
     });
   },

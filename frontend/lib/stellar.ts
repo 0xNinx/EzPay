@@ -17,14 +17,14 @@ export const STELLAR_CONFIG = {
  * In production, this would use @stellar/stellar-wallet-sdk
  */
 export async function connectWallet(): Promise<string> {
-  console.log('[v0] Initiating wallet connection...');
+  console.log('Initiating wallet connection...');
   
   // Simulate wallet connection with a delay
   return new Promise((resolve) => {
     setTimeout(() => {
       // Generate a mock public key for demonstration
       const mockAddress = 'GBRPYHIL2CI3WHZDTOOQFC6EB4KJJGUJMXQJSTUYCZLW5B63MPEXPUN';
-      console.log('[v0] Wallet connected. Address:', mockAddress);
+      console.log('Wallet connected. Address:', mockAddress);
       resolve(mockAddress);
     }, 1500);
   });
@@ -34,10 +34,10 @@ export async function connectWallet(): Promise<string> {
  * Simulates wallet disconnection
  */
 export async function disconnectWallet(): Promise<void> {
-  console.log('[v0] Disconnecting wallet...');
+  console.log('Disconnecting wallet...');
   return new Promise((resolve) => {
     setTimeout(() => {
-      console.log('[v0] Wallet disconnected');
+      console.log('Wallet disconnected');
       resolve();
     }, 500);
   });
@@ -67,11 +67,11 @@ export function shortenAddress(address: string, chars = 4): string {
  * Returns both public and secret keys
  */
 export function generateEmbeddedWallet(): { publicKey: string; secretKey: string } {
-  console.log('[v0] Generating new embedded wallet...');
+  console.log('Generating new embedded wallet...');
   const keypair = StellarSdk.Keypair.random();
   const publicKey = keypair.publicKey();
   const secretKey = keypair.secret();
-  console.log('[v0] Embedded wallet generated. Public key:', publicKey);
+  console.log('Embedded wallet generated. Public key:', publicKey);
   return { publicKey, secretKey };
 }
 
