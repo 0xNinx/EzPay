@@ -17,7 +17,7 @@ export function WalletConnect() {
       connect(walletAddress);
       updateFormData({ walletAddress });
     } catch (error) {
-      console.error('[v0] Error connecting wallet:', error);
+      console.error('Error connecting wallet:', error);
     } finally {
       setIsLoading(false);
     }
@@ -30,7 +30,7 @@ export function WalletConnect() {
       disconnect();
       updateFormData({ walletAddress: '' });
     } catch (error) {
-      console.error('[v0] Error disconnecting wallet:', error);
+      console.error('Error disconnecting wallet:', error);
     } finally {
       setIsLoading(false);
     }

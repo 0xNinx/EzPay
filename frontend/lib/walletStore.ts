@@ -14,15 +14,15 @@ export const useWalletStore = create<WalletState>((set) => ({
   address: null,
   network: 'TESTNET',
   connect: (address: string) => {
-    console.log('[v0] Wallet connected with address:', address);
+    console.log('Wallet connected with address:', address);
     set({ isConnected: true, address });
   },
   disconnect: () => {
-    console.log('[v0] Wallet disconnected');
+    console.log('Wallet disconnected');
     set({ isConnected: false, address: null });
   },
   setNetwork: (network: string) => {
-    console.log('[v0] Network set to:', network);
+    console.log('Network set to:', network);
     set({ network });
   },
 }));
