@@ -1,22 +1,14 @@
 mod config;
+mod models;
+mod routes;
 
-use axum::{routing::get, Json, Router};
-use serde::Serialize;
+use axum::Router;
 use std::{net::SocketAddr, time::Duration};
 use tower_http::{
     cors::{Any, CorsLayer},
     trace::TraceLayer,
 };
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
-
-#[derive(Serialize)]
-struct HealthResponse {
-    ok: bool,
-}
-
-async fn health() -> Json<HealthResponse> {
-    Json(HealthResponse { ok: true })
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -35,7 +27,7 @@ async fn main() -> anyhow::Result<()> {
         .unwrap_or(3001);
 
     let app = Router::new()
-        .route("/health", get(health))
+        .nest("/api", routes::merchant_routes().merge(routes::payment_routes()).merge(routes::health_routes()))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
