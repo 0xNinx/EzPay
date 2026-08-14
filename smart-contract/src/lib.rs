@@ -15,6 +15,9 @@ mod merchant_tests;
 mod payment_tests;
 
 #[cfg(test)]
+mod admin_tests;
+
+#[cfg(test)]
 mod testutils;
 
 pub use errors::ContractError;
