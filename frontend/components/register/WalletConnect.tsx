@@ -2,22 +2,30 @@
 
 import { useWalletStore } from '@/lib/walletStore';
 import { useRegistrationStore } from '@/lib/registrationStore';
-import { connectWallet, disconnectWallet, shortenAddress } from '@/lib/stellar';
-import { useState } from 'react';
+import { connectWallet, disconnectWallet, shortenAddress, isWalletAvailable, getConnectedWalletName } from '@/lib/stellar';
+import { useState, useEffect } from 'react';
 
 export function WalletConnect() {
   const { isConnected, address, connect, disconnect } = useWalletStore();
   const { updateFormData } = useRegistrationStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [walletAvailable, setWalletAvailable] = useState(false);
+
+  useEffect(() => {
+    setWalletAvailable(isWalletAvailable());
+  }, []);
 
   const handleConnect = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const walletAddress = await connectWallet();
       connect(walletAddress);
       updateFormData({ walletAddress });
     } catch (error) {
       console.error('Error connecting wallet:', error);
+      setError(error instanceof Error ? error.message : 'Failed to connect wallet');
     } finally {
       setIsLoading(false);
     }
@@ -25,12 +33,14 @@ export function WalletConnect() {
 
   const handleDisconnect = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       await disconnectWallet();
       disconnect();
       updateFormData({ walletAddress: '' });
     } catch (error) {
       console.error('Error disconnecting wallet:', error);
+      setError(error instanceof Error ? error.message : 'Failed to disconnect wallet');
     } finally {
       setIsLoading(false);
     }
@@ -43,12 +53,20 @@ export function WalletConnect() {
           <div className="mb-4 text-4xl">🔗</div>
           <h3 className="text-lg font-semibold text-foreground mb-2">Connect Your Stellar Wallet</h3>
           <p className="text-muted-foreground text-sm mb-4">
-            Link your Stellar wallet to receive payments. Supports Freighter, Lobstr, and Albedo.
+            Link your Stellar wallet to receive payments. Supports Freighter, Lobstr, Albedo, and Rabet.
           </p>
+          {!walletAvailable && (
+            <p className="text-xs text-yellow-500 mb-4">
+              No wallet detected. Please install a Stellar wallet extension.
+            </p>
+          )}
+          {error && (
+            <p className="text-xs text-red-500 mb-4">{error}</p>
+          )}
           <button
             onClick={handleConnect}
-            disabled={isLoading}
-            className="px-6 py-3 bg-accent text-accent-foreground font-semibold rounded-lg hover:shadow-lg hover:shadow-accent/50 hover:scale-105 transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading || !walletAvailable}
+            className="px-6 py-3 bg-accent text-accent-foreground font-semibold rounded-lg hover:shadow-lg hover:shadow-accent/50 hover:scale-105 transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isLoading ? 'Connecting...' : 'Connect Wallet'}
           </button>
@@ -59,6 +77,9 @@ export function WalletConnect() {
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
               <h3 className="text-lg font-semibold text-foreground">Wallet Connected</h3>
+              <span className="text-xs text-muted-foreground bg-background px-2 py-1 rounded">
+                {getConnectedWalletName()}
+              </span>
             </div>
             <button
               onClick={handleDisconnect}
