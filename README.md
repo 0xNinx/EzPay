@@ -240,20 +240,31 @@ EzPay is designed with security and compliance in mind.
 ```text
 ezpay/
 │
-├── src/
-│   ├── config/
-│   ├── controllers/
-│   ├── services/
-│   ├── routes/
-│   ├── models/
-│   ├── middleware/
-│   ├── utils/
-│   └── main.rs
+├── frontend/           # Next.js frontend application
+│   ├── app/           # Next.js app directory
+│   ├── components/    # React components
+│   ├── lib/           # Utilities and API clients
+│   └── package.json
 │
-├── scripts/
-├── tests/
+├── backend/            # Rust backend API
+│   ├── src/
+│   │   ├── config/    # Configuration
+│   │   ├── models/    # Database models
+│   │   ├── routes/    # API routes
+│   │   ├── middleware/ # Middleware
+│   │   └── main.rs
+│   ├── migrations/    # Database migrations
+│   └── Cargo.toml
+│
+├── smart-contract/     # Soroban smart contract
+│   ├── src/
+│   │   ├── admin/     # Admin functions
+│   │   ├── merchant/  # Merchant functions
+│   │   ├── payment/   # Payment functions
+│   │   └── lib.rs
+│   └── Cargo.toml
+│
 ├── .env.example
-├── Cargo.toml
 ├── README.md
 ├── CONTRIBUTING.md
 └── LICENSE
