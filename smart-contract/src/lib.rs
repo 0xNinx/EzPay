@@ -8,6 +8,18 @@ mod payment;
 mod storage;
 mod types;
 
+#[cfg(test)]
+mod merchant_tests;
+
+#[cfg(test)]
+mod payment_tests;
+
+#[cfg(test)]
+mod admin_tests;
+
+#[cfg(test)]
+mod testutils;
+
 pub use errors::ContractError;
 pub use types::{MerchantData, PaymentRequest, PaymentStatus, PayoutMethod};
 

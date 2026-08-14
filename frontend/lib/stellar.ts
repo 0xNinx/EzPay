@@ -1,10 +1,33 @@
 /**
  * Stellar Wallet Integration Helpers
  * This module provides utilities for connecting to Stellar wallets
- * using the Stellar SDK
+ * using the Stellar SDK and wallet connectors
  */
 
 import * as StellarSdk from 'stellar-sdk';
+
+// TypeScript declarations for wallet extensions
+declare global {
+  interface Window {
+    freighter?: {
+      getPublicKey: () => Promise<string>;
+      signTransaction: (xdr: string, network: string) => Promise<string>;
+      isConnected: () => Promise<boolean>;
+    };
+    albedo?: {
+      publicKey: () => Promise<{ address: string }>;
+      sign: (xdr: string, network: string) => Promise<{ signedXDR: string }>;
+    };
+    lobstr?: {
+      getPublicKey: () => Promise<string>;
+      signTransaction: (xdr: string) => Promise<string>;
+    };
+    rabet?: {
+      connect: () => Promise<string>;
+      sign: (xdr: string) => Promise<string>;
+    };
+  }
+}
 
 export const STELLAR_CONFIG = {
   network: 'TESTNET' as const,
@@ -13,34 +36,68 @@ export const STELLAR_CONFIG = {
 };
 
 /**
- * Simulates wallet connection
- * In production, this would use @stellar/stellar-wallet-sdk
+ * Connects to a Stellar wallet (Freighter, Lobstr, Albedo, or Rabet)
+ * Tries multiple wallet providers in order
  */
 export async function connectWallet(): Promise<string> {
   console.log('Initiating wallet connection...');
   
-  // Simulate wallet connection with a delay
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      // Generate a mock public key for demonstration
-      const mockAddress = 'GBRPYHIL2CI3WHZDTOOQFC6EB4KJJGUJMXQJSTUYCZLW5B63MPEXPUN';
-      console.log('Wallet connected. Address:', mockAddress);
-      resolve(mockAddress);
-    }, 1500);
-  });
+  // Try Freighter first (most popular)
+  if (window.freighter) {
+    try {
+      const address = await window.freighter.getPublicKey();
+      console.log('Connected via Freighter:', address);
+      return address;
+    } catch (error) {
+      console.error('Freighter connection failed:', error);
+    }
+  }
+  
+  // Try Albedo
+  if (window.albedo) {
+    try {
+      const { address } = await window.albedo.publicKey();
+      console.log('Connected via Albedo:', address);
+      return address;
+    } catch (error) {
+      console.error('Albedo connection failed:', error);
+    }
+  }
+  
+  // Try Lobstr
+  if (window.lobstr) {
+    try {
+      const address = await window.lobstr.getPublicKey();
+      console.log('Connected via Lobstr:', address);
+      return address;
+    } catch (error) {
+      console.error('Lobstr connection failed:', error);
+    }
+  }
+  
+  // Try Rabet
+  if (window.rabet) {
+    try {
+      const address = await window.rabet.connect();
+      console.log('Connected via Rabet:', address);
+      return address;
+    } catch (error) {
+      console.error('Rabet connection failed:', error);
+    }
+  }
+  
+  throw new Error('No Stellar wallet found. Please install Freighter, Albedo, Lobstr, or Rabet.');
 }
 
 /**
- * Simulates wallet disconnection
+ * Disconnects from the Stellar wallet
+ * Note: Most wallets don't have a formal disconnect, this clears local state
  */
 export async function disconnectWallet(): Promise<void> {
   console.log('Disconnecting wallet...');
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log('Wallet disconnected');
-      resolve();
-    }, 500);
-  });
+  // Wallets typically don't have a disconnect method
+  // The actual disconnection is handled by clearing state in the store
+  return Promise.resolve();
 }
 
 /**
@@ -85,4 +142,50 @@ export function isValidStellarSecret(secret: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Signs a transaction using the connected wallet
+ */
+export async function signTransaction(xdr: string): Promise<string> {
+  // Try Freighter
+  if (window.freighter) {
+    return await window.freighter.signTransaction(xdr, STELLAR_CONFIG.networkPassphrase);
+  }
+  
+  // Try Albedo
+  if (window.albedo) {
+    const result = await window.albedo.sign(xdr, STELLAR_CONFIG.networkPassphrase);
+    return result.signedXDR;
+  }
+  
+  // Try Lobstr
+  if (window.lobstr) {
+    return await window.lobstr.signTransaction(xdr);
+  }
+  
+  // Try Rabet
+  if (window.rabet) {
+    return await window.rabet.sign(xdr);
+  }
+  
+  throw new Error('No wallet connected for signing');
+}
+
+/**
+ * Checks if a wallet is available
+ */
+export function isWalletAvailable(): boolean {
+  return !!(window.freighter || window.albedo || window.lobstr || window.rabet);
+}
+
+/**
+ * Gets the name of the connected wallet
+ */
+export function getConnectedWalletName(): string | null {
+  if (window.freighter) return 'Freighter';
+  if (window.albedo) return 'Albedo';
+  if (window.lobstr) return 'Lobstr';
+  if (window.rabet) return 'Rabet';
+  return null;
 }
