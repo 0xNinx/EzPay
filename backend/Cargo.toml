@@ -18,6 +18,9 @@ deadpool-postgres = "0.14.0"
 tokio-postgres = "0.7.11"
 deadpool = "0.12.1"
 
+[dev-dependencies]
+tokio-test = "0.4.4"
+
 [profile.release]
 lto = true
 codegen-units = 1
