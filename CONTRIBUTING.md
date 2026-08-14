@@ -77,11 +77,31 @@ cargo run
 
 ```text
 ezpay/
-├── src/
-├── tests/
-├── scripts/
+├── frontend/           # Next.js frontend application
+│   ├── app/           # Next.js app directory
+│   ├── components/    # React components
+│   ├── lib/           # Utilities and API clients
+│   └── package.json
+│
+├── backend/            # Rust backend API
+│   ├── src/
+│   │   ├── config/    # Configuration
+│   │   ├── models/    # Database models
+│   │   ├── routes/    # API routes
+│   │   ├── middleware/ # Middleware
+│   │   └── main.rs
+│   ├── migrations/    # Database migrations
+│   └── Cargo.toml
+│
+├── smart-contract/     # Soroban smart contract
+│   ├── src/
+│   │   ├── admin/     # Admin functions
+│   │   ├── merchant/  # Merchant functions
+│   │   ├── payment/   # Payment functions
+│   │   └── lib.rs
+│   └── Cargo.toml
+│
 ├── .env.example
-├── Cargo.toml
 ├── README.md
 ├── CONTRIBUTING.md
 └── LICENSE
