@@ -2,6 +2,7 @@ mod config;
 mod models;
 mod routes;
 mod db;
+mod middleware;
 
 use axum::Router;
 use std::{net::SocketAddr, time::Duration};
