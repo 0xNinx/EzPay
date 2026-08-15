@@ -133,4 +133,8 @@ impl EzPayContract {
     ) -> Result<PaymentRequest, ContractError> {
         payment::get_payment_request(&env, &request_id)
     }
+
+    pub fn get_version(env: Env) -> String {
+        String::from_str(&env, "1.0.0")
+    }
 }
