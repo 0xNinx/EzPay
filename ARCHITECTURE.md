@@ -1,128 +1,143 @@
 # EzPay Architecture Overview
 
-## System Architecture
+This document provides deep technical details about EzPay's system design. For project overview, see [README.md](README.md). For development setup, see [DEVELOPMENT.md](DEVELOPMENT.md).
 
-EzPay is a three-tier payment infrastructure consisting of:
+## System Design Decisions
 
-1. **Frontend** - Next.js web application
-2. **Backend** - Rust REST API
-3. **Smart Contract** - Soroban contract on Stellar
+### Why Three-Tier Architecture
+- **Separation of concerns**: Frontend handles UI, backend handles business logic, smart contract handles on-chain state
+- **Scalability**: Each tier can scale independently
+- **Security**: Smart contract provides immutable on-chain logic, backend provides off-chain data persistence
 
-## Component Diagram
+### Why Rust for Backend
+- **Performance**: Zero-cost abstractions, memory safety
+- **Concurrency**: Tokio async runtime for high-throughput API
+- **Type safety**: Compile-time error prevention
 
+### Why Soroban for Smart Contract
+- **Stellar integration**: Native to Stellar network
+- **WASM-based**: Portable, efficient execution
+- **Developer experience**: Rust-based, familiar toolchain
+
+## Module Interactions
+
+### Frontend → Backend Communication
 ```
-┌─────────────────┐
-│   Frontend      │
-│   (Next.js)     │
-└────────┬────────┘
-         │ HTTP/REST
-         ↓
-┌─────────────────┐
-│   Backend API   │
-│   (Rust/Axum)   │
-└────────┬────────┘
-         │
-    ┌────┴────┐
-    ↓         ↓
-┌──────┐  ┌──────────┐
-│  DB  │  │ Stellar  │
-│PostgreSQL│ Network │
-└──────┘  └──────────┘
+Frontend (React Query)
+    ↓ HTTP/REST
+Backend (Axum Router)
+    ↓ Middleware (Auth, Rate Limit)
+    ↓ Route Handler
+    ↓ Business Logic
+    ↓ Database (SQLx)
+PostgreSQL
 ```
 
-## Frontend Architecture
+### Backend → Smart Contract Communication
+```
+Backend (Stellar SDK)
+    ↓ Transaction Signing
+Stellar Network (Horizon API)
+    ↓ Transaction Submission
+Smart Contract (Soroban)
+    ↓ State Update
+Stellar Ledger
+```
 
-### Tech Stack
-- Next.js 16 (App Router)
-- React 19
-- TypeScript
-- Tailwind CSS
-- Zustand (state management)
-- React Query (data fetching)
-- Stellar SDK
+## Data Persistence Strategy
 
-### Key Components
-- Wallet integration (Freighter, Albedo, Lobstr, Rabet)
-- Merchant dashboard
-- Payment history
-- QR code generation
-- Payment link generation
+### On-Chain Data (Smart Contract)
+- Merchant registration status
+- Payment request creation
+- Fee configuration
+- Admin controls
 
-## Backend Architecture
+### Off-Chain Data (PostgreSQL)
+- Merchant profiles (name, wallet, payout method)
+- Payment history (amount, status, timestamps)
+- Transaction metadata
+- Analytics data
 
-### Tech Stack
-- Rust
-- Axum (web framework)
-- SQLx (database)
-- PostgreSQL
-- Stellar SDK
+### Synchronization Strategy
+- Smart contract emits events for state changes
+- Backend listens to events via Horizon streams
+- Backend updates PostgreSQL to reflect on-chain state
+- Frontend queries backend for combined on-chain/off-chain data
 
-### Modules
-- **config** - Environment configuration
-- **models** - Database models (Merchant, Payment)
-- **routes** - API endpoints (merchants, payments, health)
-- **middleware** - Auth, rate limiting, error handling
-- **db** - Database connection pool
+## Security Architecture
 
-### API Endpoints
-- `/api/health` - Health check
-- `/api/merchants/*` - Merchant CRUD operations
-- `/api/payments/*` - Payment operations
-- `/api/payment-requests/*` - Payment request management
+### Authentication Flow (To Be Implemented)
+```
+Client Request
+    ↓ JWT Token
+Auth Middleware
+    ↓ Token Validation
+Backend Handler
+    ↓ User Context
+Business Logic
+```
 
-## Smart Contract Architecture
+### Rate Limiting Strategy (To Be Implemented)
+- IP-based rate limiting for public endpoints
+- User-based rate limiting for authenticated endpoints
+- Token bucket algorithm for burst handling
+- Redis-backed for distributed rate limiting
 
-### Tech Stack
-- Rust
-- Soroban SDK
-- Stellar Network
+### Input Validation
+- Frontend: React Hook Form with Zod validation
+- Backend: Serde deserialization with custom validators
+- Smart Contract: Soroban type validation
 
-### Modules
-- **admin** - Contract initialization, admin controls
-- **merchant** - Merchant registration and management
-- **payment** - Payment request creation and processing
-- **storage** - Contract storage
-- **types** - Data structures
-- **errors** - Error types
+## Error Handling Strategy
 
-### Key Functions
-- `initialize` - Contract setup
-- `register_merchant` - Register merchant
-- `create_payment_request` - Create payment request
-- `pay` - Process payment
-- `cancel_payment_request` - Cancel request
+### Frontend Error Handling
+- React Query error boundaries
+- Global error context
+- User-friendly error messages
 
-## Data Flow
+### Backend Error Handling
+- Custom AppError enum
+- HTTP status code mapping
+- Structured error responses
+- Logging with tracing
 
-### Payment Flow (Registered Merchant)
-1. Customer initiates payment via frontend
-2. Frontend calls backend API
-3. Backend validates and creates payment request
-4. Customer signs transaction with wallet
-5. Transaction submitted to Stellar network
-6. Smart contract processes payment
-7. Backend updates database
-8. Frontend displays confirmation
+### Smart Contract Error Handling
+- Custom error types
+- Revert on invalid operations
+- Error codes for client handling
 
-### Payment Flow (Unregistered Merchant)
-1. Customer enters merchant bank details
-2. Backend routes through Anchor infrastructure
-3. Payment settles on Stellar
-4. Fiat payout processed to merchant bank
+## Performance Optimization
 
-## Security Considerations
+### Database Optimization
+- Connection pooling (deadpool-postgres)
+- Indexed queries on frequently accessed columns
+- Prepared statements via SQLx
+- Read replicas for scaling (to be added)
 
-- JWT-based authentication (to be implemented)
-- Rate limiting (to be implemented)
-- Input validation
-- Stellar transaction validation
-- Secure wallet handling
-- Database encryption for sensitive data
-
-## Scalability Considerations
-
-- Connection pooling for database
+### API Optimization
 - Async I/O with Tokio
-- Stateless API design
-- Smart contract for on-chain logic
-- Caching layer (to be added)
+- Response compression (tower-http)
+- CORS configuration
+- Static asset caching
+
+### Frontend Optimization
+- Next.js static generation
+- React Query caching
+- Code splitting
+- Image optimization
+
+## Deployment Architecture
+
+### Local Development
+- Docker Compose for all services
+- PostgreSQL container
+- Backend container
+- Frontend container
+- Shared network for inter-service communication
+
+### Production (To Be Implemented)
+- Kubernetes for orchestration
+- Horizontal pod autoscaling
+- Load balancer for API
+- CDN for frontend assets
+- Managed PostgreSQL (e.g., AWS RDS)
