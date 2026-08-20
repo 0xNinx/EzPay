@@ -28,8 +28,10 @@ async fn main() -> anyhow::Result<()> {
         .and_then(|v| v.parse().ok())
         .unwrap_or(3001);
 
+    let pool = db::create_pool().await?;
+
     let app = Router::new()
-        .nest("/api", routes::merchant_routes().merge(routes::payment_routes()).merge(routes::health_routes()))
+        .nest("/api", routes::merchant_routes().merge(routes::payment_routes()).merge(routes::health_routes_with_db(pool.clone())))
         .layer(
             CorsLayer::new()
                 .allow_origin(Any)
