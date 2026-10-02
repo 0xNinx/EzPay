@@ -38,9 +38,7 @@ export function PaymentLinkGenerator() {
   const generateLink = async () => {
     const request = await createRequest.mutateAsync();
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://ezpay.io';
-    const params = new URLSearchParams();
-    params.set('token', request.token);
-    const link = `${baseUrl}/payment-link?${params.toString()}`;
+    const link = `${baseUrl}/pay/${request.id}`;
     setGeneratedLink(link);
   };
 
